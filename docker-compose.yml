@@ -1,0 +1,31 @@
+version: '1'
+
+services:
+    django:
+        restart: on-failure:3
+        build:
+            context: backend/
+            dockerfile: ./Dockerfile
+        command: bash -c 'django-admin startproject config . && python manage.py makemigrations && python manage.py migrate && python manage.py createsuperuser --username=admin --email=admin@admin.com --noinput && python manage.py runserver 0.0.0.0:8000'
+        depends_on:
+            - postgresql
+        ports:
+            - 8000:8000
+        environment:
+            - SECRET_KEY=django-insecure-bd#m@nf%*_!v4&_f9b)+x=cbll@0479@keiqq21uf0y^0lfo
+            - DJANGO_SUPERUSER_PASSWORD=admin
+            - DB_HOST=postgresql
+            - DB_NAME=main
+            - DB_PORT=5432
+            - DB_USER=postgres
+            - DB_PASSWORD=postgres
+            - DJANGO_SETTINGS_MODULE=config.settings
+            - PYTHONUNBUFFERED=True
+            - DEBUG=1
+    postgresql:
+        image: postgres:13.0
+        environment:
+            - POSTGRES_DB=main
+            - POSTGRES_PASSWORD=postgres
+        ports:
+            - 5432:5432
